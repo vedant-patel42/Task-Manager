@@ -1,89 +1,91 @@
-// Create task button click event
-document.getElementById("create-task-button").addEventListener("click", function() {
-    // Get task name and description from the form
-    var taskName = document.getElementById("create-task-name").value;
-    var taskDescription = document.getElementById("create-task-description").value;
-
-    // Send a POST request to the backend service to create the task
-    // The endpoint URL and data format will depend on the backend service you are using
-    fetch('/create-task', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            taskName: taskName,
-            taskDescription: taskDescription
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Add the new task to the table
-        var taskListTableBody = document.getElementById("task-list-table-body");
-        var newRow = taskListTableBody.insertRow();
-        var taskNameCell = newRow.insertCell(0);
-        var taskDescriptionCell = newRow.insertCell(1);
-        var actionsCell = newRow.insertCell(2);
-
-        taskNameCell.innerHTML = taskName;
-        taskDescriptionCell.innerHTML = taskDescription;
-        actionsCell.innerHTML = '<button class="update-task-button">Update</button> <button class="delete-task-button">Delete</button>';
-    });
-});
-
-// Update task button click event
-document.getElementById("task-list-table-body").addEventListener("click", function(event) {
-    if (event.target.matches(".update-task-button")) {
-        // Get the task ID from the table row
-        var taskId = event.target.parentNode.parentNode.getAttribute("data-task-id");
-
-        // Send a GET request to the backend service to get the task data
-        // The endpoint URL and data format will depend on the backend service you are using
-        fetch('/get-task/' + taskId, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Fill the update task form with the task data
-            document.getElementById("update-task-name").value = data.taskName;
-            document.getElementById("update-task-description").value = data.taskDescription;
-
-            // Show the update task form
-            document.getElementById("update-task-form").style.display = "block";
-        });
+const tasksDOM = document.querySelector('.tasks')
+const loadingDOM = document.querySelector('.loading-text')
+const formDOM = document.querySelector('.task-form')
+const taskInputDOM = document.querySelector('.task-input')
+const descriptionInputDOM =  document.querySelector('.task-description')
+const formAlertDOM = document.querySelector('.form-alert')
+// Load tasks from /api/tasks
+const showTasks = async () => {
+  loadingDOM.style.visibility = 'visible'
+  try {
+    const {
+      data: { tasks },
+    } = await axios.get('/api/v1/tasks')
+    if (tasks.length < 1) {
+      tasksDOM.innerHTML = '<h5 class="empty-list">No tasks in your list</h5>'
+      loadingDOM.style.visibility = 'hidden'
+      return
     }
-});
-document.getElementById("update-task-form-update-button").addEventListener("click", function(event) {
-    event.preventDefault();
+    const allTasks = tasks
+      .map((task) => {
+        const { completed, _id: taskID, name,description } = task
+        return `<div class="all-tasks">
+        <div class="single-task ${completed && 'task-completed'}">
+<h5><span><i class="far fa-check-circle"></i></span>${name}</h5>
+<div class="task-links">
 
-    // Get the task details from the form
-    var taskId = document.getElementById("update-task-form-id").value;
-    var taskName = document.getElementById("update-task-form-name").value;
-    var taskDescription = document.getElementById("update-task-form-description").value;
 
-    // Send a PUT request to the backend service to update the task
-    // The endpoint URL and data format will depend on the backend service you are using
-    fetch('/update-task/' + taskId, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            taskName: taskName,
-            taskDescription: taskDescription
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update the task in the table
-        var taskRow = document.querySelector("#task-list-table-body tr[data-task-id='" + taskId + "']");
-        taskRow.querySelector("td:first-child").innerHTML = taskName;
-        taskRow.querySelector("td:nth-child(2)").innerHTML = taskDescription;
 
-        // Hide the update task form
-        document.getElementById("update-task-form").style.display = "none";
-    });
-});
+<!-- edit link -->
+<a href="task.html?id=${taskID}"  class="edit-link">
+<i class="fas fa-edit"></i>
+</a>
+<!-- delete btn -->
+<button type="button" class="delete-btn" data-id="${taskID}">
+<i class="fas fa-trash"></i>
+</button>
+</div>
+</div>
+<h6><span><b>Description:</b>${description}</span></h6>
+</div>`
+}).join('')
+    tasksDOM.innerHTML = allTasks
+  } catch (error) {
+    tasksDOM.innerHTML =
+      '<h5 class="empty-list">There was an error, please try later....</h5>'
+  }
+  loadingDOM.style.visibility = 'hidden'
+}
+
+showTasks()
+
+// delete task /api/tasks/:id
+
+tasksDOM.addEventListener('click', async (e) => {
+  const el = e.target
+  if (el.parentElement.classList.contains('delete-btn')) {
+    loadingDOM.style.visibility = 'visible'
+    const id = el.parentElement.dataset.id
+    try {
+      await axios.delete(`/api/v1/tasks/${id}`)
+      showTasks()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  loadingDOM.style.visibility = 'hidden'
+})
+
+// form
+
+formDOM.addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const name = taskInputDOM.value
+  const description = descriptionInputDOM.value
+  try {
+    await axios.post('/api/v1/tasks', {name,description})
+    showTasks()
+    taskInputDOM.value = ''
+    descriptionInputDOM.value = ''
+    formAlertDOM.style.display = 'block'
+    formAlertDOM.textContent = `success, task added`
+    formAlertDOM.classList.add('text-success')
+  } catch (error) {
+    formAlertDOM.style.display = 'block'
+    formAlertDOM.innerHTML = `Fill required details`
+  }
+  setTimeout(() => {
+    formAlertDOM.style.display = 'none'
+    formAlertDOM.classList.remove('text-success')
+  }, 1000)
+})
