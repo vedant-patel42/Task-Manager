@@ -1,159 +1,54 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Task Manager</title>
-</head>
-<style>
-/* Add some basic styling to the page */
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-h1 {
-  text-align: center;
-  margin: 20px 0;
-}
-
-/* Style the form to create a new task */
-#create-task-form {
-  width: 50%;
-  margin: 0 auto;
-}
-
-#create-task-form label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-#create-task-form input[type="text"], #create-task-form textarea {
-  width: 100%;
-  padding: 12px 20px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-}
-
-#create-task-form button[type="submit"] {
-  width: 100%;
-  padding: 14px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Style the table to display all tasks */
-#task-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#task-table th, #task-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
-}
-
-#task-table th {
-  background-color: #f2f2f2;
-}
-
-/* Style the form to update a task */
-#update-task-form {
-  width: 50%;
-  margin: 20px auto;
-  background-color: #f2f2f2;
-  padding: 20px;
-  border-radius: 4px;
-}
-
-#update-task-form label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-#update-task-form input[type="text"], #update-task-form textarea {
-  width: 100%;
-  padding: 12px 20px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-}
-
-#update-task-form button[type="submit"], #update-task-form button[type="button"] {
-  width: 100%;
-  padding: 14px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#update-task-form button[type="button"] {
-  background-color: #f44336;
-  margin-top: 10px;
-}
-</style>
-<body>
-  <h1>Task Manager</h1>
-
-  <!-- Form to create a new task -->
-  <form id="create-task-form">
-    <label for="task-name">Task Name:</label>
-    <input type="text" id="task-name" name="task-name" required>
-    <br>
-    <label for="task-description">Task Description:</label>
-    <textarea id="task-description" name="task-description"></textarea>
-    <br>
-    <button type="submit">Create Task</button>
-  </form>
-
-  <br>
-
-  <!-- Table to display all tasks -->
-  <table id="task-table">
-    <thead>
-      <tr>
-        <th>Task Name</th>
-        <th>Task Description</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="task-table-body">
-      <!-- Rows for each task will be added here dynamically -->
-    </tbody>
-  </table>
-
-  <br>
-
-  <!-- Form to update a task -->
-  <form id="update-task-form" style="display: none;">
-    <input type="hidden" id="task-id" name="task-id">
-    <label for="update-task-name">Task Name:</label>
-    <input type="text" id="update-task-name" name="update-task-name" required>
-    <br>
-    <label for="update-task-description">Task Description:</label>
-    <textarea id="update-task-description" name="update-task-description"></textarea>
-    <br>
-    <button type="submit">Update Task</button>
-    <button type="button" id="cancel-update-task-button">Cancel</button>
-  </form>
-
-  <script
-  src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
-  integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
-<script src="./browser-app.js"></script>
-
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- favicon -->
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
+    <!-- font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+    <!-- normalize css -->
+    <link rel="stylesheet" href="./normalize.css" />
+    <!-- main css -->
+    <link rel="stylesheet" href="./main.css" />
+    <title>Task Manager</title>
+  </head>
+  <body>
+    <form class="task-form">
+      <h4>task manager</h4>
+      <div class="form control">
+        <input
+          type="text"
+          name="name"
+          class="task-input"
+          placeholder="e.g. wash dishes"
+        />
+      </div>
+        <input
+        type="text"
+        name="name"
+        class="task-description"
+        placeholder="Describe your task"
+      />
+        <button type="submit" class="btn submit-btn">submit</button>
+    </div>
+      <div class="form-alert"></div>
+    </form>
+    <section class="tasks-container">
+      <p class="loading-text">Loading...</p>
+      <div class="tasks"></div>
+    </section>
+    <!-- axios -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+      integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="./browser-app.js"></script>
+  </body>
 </html>
